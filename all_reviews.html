@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimoo | Customer Reviews</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .star-rating {
+            display: flex;
+            gap: 0.25rem;
+            color: #fbbf24;
+            font-size: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+    <header id="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" style="display: flex; align-items: center; gap: 0.5rem;">
+                <img src="images/logominimoo.jpeg" alt="Minimoo Logo" style="height: 40px; width: auto; border-radius: 8px; object-fit: contain;">
+                <span><span class="gradient-text">Mini</span>moo</span>
+            </a>
+            <nav>
+                <button class="hamburger" aria-label="Toggle menu" id="mobile-toggle">
+                    ☰
+                </button>
+                <ul class="nav-links" id="nav-menu">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="all_reviews.html" class="active">All Reviews</a></li>
+                    <li><a href="organization.html">Organization</a></li>
+                    <li><a href="order.html">Order</a></li>
+                    <li><a href="track_order.html">Track Order</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" style="min-height: 40vh; padding-top: 120px; padding-bottom: 2rem;">
+        <div class="container">
+            <div class="section-header animate-on-scroll" style="margin-bottom: 0;">
+                <span class="tagline">What Our Customers Say</span>
+                <h1 style="font-size: clamp(2.5rem, 4vw, 4rem);">Customer <span class="gradient-text">Feedback</span></h1>
+                <p style="max-width: 600px; margin: 0 auto;">See what everyone thinks about Kabadi.</p>
+                <br>
+                <!-- This now explicitly points to the dedicated submission form -->
+                <a href="write_review.html" class="btn btn-primary">Write a Review</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="reviews-list" style="padding-top: 0; background: var(--light-bg); min-height: 50vh;">
+        <div class="container" style="padding-top: 2rem;">
+            <div class="event-list max-w-3xl mx-auto" id="reviewsContainer" style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Reviews will be loaded here dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                        <img src="images/logominimoo.jpeg" alt="Minimoo Logo" style="height: 30px; width: auto; border-radius: 4px; object-fit: contain;">
+                        <span><span class="gradient-text">Mini</span>moo</span>
+                    </h3>
+                    <p>Making everyday life easier with innovative, eco-friendly reusable products.</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 0.5rem;"><a href="index.html">Home</a></li>
+                        <li style="margin-bottom: 0.5rem;"><a href="products.html">Products</a></li>
+                        <li style="margin-bottom: 0.5rem;"><a href="all_reviews.html">All Reviews</a></li>
+                        <li style="margin-bottom: 0.5rem;"><a href="order.html">Order</a></li>
+                        <li style="margin-bottom: 0.5rem;"><a href="track_order.html">Track Order</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contact Us</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 0.5rem;"><a href="https://instagram.com/kabadi.byminimoo" target="_blank">📸 IG: @kabadi.byminimoo</a></li>
+                        <li style="margin-bottom: 0.5rem;"><a href="mailto:minimoo.official@gmail.com">✉️ Email: minimoo.official@gmail.com</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Minimoo. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('reviewsContainer');
+
+            // Default Reviews
+            const defaultReviews = [
+                { name: "Sarah J.", title: "A Lifesaver for My Desk", rating: 5, text: "I drink iced coffee every day, and I was so tired of wiping my desk. Kabadi completely solved it.", verified: true },
+                { name: "Mark T.", title: "Perfect for Hot Tea", rating: 5, text: "My morning tea used to burn my hands. Now I can comfortably hold it and it stays hot longer!", verified: true },
+                { name: "Emily R.", title: "Sleek and Stylish", rating: 5, text: "Not only does it work perfectly, but it also looks amazing on my office desk. Highly recommended.", verified: true }
+            ];
+
+            let reviews = JSON.parse(localStorage.getItem('minimoo_reviews'));
+            if (!reviews) {
+                reviews = defaultReviews;
+                localStorage.setItem('minimoo_reviews', JSON.stringify(reviews));
+            }
+
+            container.innerHTML = '';
+            reviews.forEach(review => {
+                const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                const reviewEl = document.createElement('div');
+                reviewEl.className = 'glass-card animate-on-scroll';
+                reviewEl.style.padding = '1.5rem';
+                reviewEl.style.display = 'flex';
+                reviewEl.style.flexDirection = 'column';
+                reviewEl.style.gap = '0.5rem';
+                
+                reviewEl.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
+                        <h3 style="margin: 0;">"${review.title}"</h3>
+                        <div class="star-rating">${stars}</div>
+                    </div>
+                    <p class="text-muted" style="margin: 0; font-size: 0.9rem;">${review.name} ${review.verified ? '• Verified Buyer' : '• Customer'}</p>
+                    <p style="margin-top: 0.5rem; line-height: 1.6;">${review.text}</p>
+                `;
+                container.appendChild(reviewEl);
+            });
+        });
+    </script>
+</body>
+</html>

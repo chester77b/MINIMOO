@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimoo Internal Dashboard</title>
+    <!-- Admin Authentication Lock -->
+    <script>
+        if (sessionStorage.getItem('minimoo_admin_auth') !== 'true') {
+            window.location.replace('admin_login.html');
+        }
+        function logout() {
+            sessionStorage.removeItem('minimoo_admin_auth');
+            window.location.replace('admin_login.html');
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ec4899;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --gray: #9ca3af;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--light); color: var(--dark); padding: 2rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 1rem; }
+        .dashboard-container { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+        .card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h1, h2 { color: var(--dark); }
+        .table-wrapper { overflow-x: auto; margin-top: 1rem; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; }
+        th { background-color: #f9fafb; font-weight: 600; color: #4b5563; }
+        .status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+        .status-processing { background: #fef3c7; color: #d97706; }
+        .status-shipped { background: #dbeafe; color: #1d4ed8; }
+        .status-delivered { background: #dcfce3; color: #15803d; }
+        .status-cancelled { background: #fee2e2; color: #b91c1c; }
+        .status-select { font-family: inherit; font-size: 0.85rem; font-weight: 600; padding: 0.3rem; border-radius: 8px; border: 1px solid #ccc; background: white; cursor: pointer; }
+        .btn { background: var(--primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 500;}
+        .btn-danger { background: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <!-- Placeholder for isolated branding -->
+            <div style="width: 40px; height: 40px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">M</div>
+            <h1>Minimoo Central HQ</h1>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <a href="admin_customers.html" class="btn btn-outline" style="background: white; border: 1px solid #ccc; color: var(--dark); text-decoration: none;">View Customer DB</a>
+            <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+            <button class="btn" style="background: #4b5563;" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Orders Tracking -->
+        <div class="card">
+            <h2>Product Tracking & Orders</h2>
+            <div class="table-wrapper">
+                <table id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer Name</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Address</th>
+                            <th>Qty</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reviews Data -->
+        <div class="card">
+            <h2>Customer Feedback & Reviews</h2>
+            <div class="table-wrapper">
+                <table id="reviewsTable">
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Rating</th>
+                            <th>Review Title</th>
+                            <th>Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviewsBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loadDashboard() {
+            // Load Orders
+            const orders = JSON.parse(localStorage.getItem('minimoo_orders')) || [];
+            const ordersBody = document.getElementById('ordersBody');
+            ordersBody.innerHTML = '';
+            if (orders.length === 0) {
+                ordersBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--gray);">No orders received yet.</td></tr>';
+            } else {
+                orders.forEach((order, index) => {
+                    const currentStatus = order.status || 'processing';
+                    ordersBody.innerHTML += `
+                        <tr>
+                            <td style="font-family: monospace;">#KBD-${String(index+1).padStart(4, '0')}</td>
+                            <td><strong>${order.name}</strong></td>
+                            <td>${order.phone}</td>
+                            <td>${order.email || 'N/A'}</td>
+                            <td><div style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${order.address}">${order.address}</div></td>
+                            <td>${order.quantity}</td>
+                            <td style="text-transform: uppercase;">${order.payment}</td>
+                            <td>
+                                <select class="status-select status-${currentStatus}" onchange="updateOrderStatus(${index}, this.value)">
+                                    <option value="processing" ${currentStatus === 'processing' ? 'selected' : ''}>Processing</option>
+                                    <option value="shipped" ${currentStatus === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                    <option value="delivered" ${currentStatus === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                    <option value="cancelled" ${currentStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Load Reviews
+            const reviews = JSON.parse(localStorage.getItem('minimoo_reviews')) || [];
+            const reviewsBody = document.getElementById('reviewsBody');
+            reviewsBody.innerHTML = '';
+            if (reviews.length === 0) {
+                reviewsBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--gray);">No reviews received yet.</td></tr>';
+            } else {
+                reviews.forEach(review => {
+                    const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                    reviewsBody.innerHTML += `
+                        <tr>
+                            <td><strong>${review.name}</strong></td>
+                            <td style="color: #fbbf24;">${stars}</td>
+                            <td>${review.title}</td>
+                            <td><div style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${review.text}">${review.text}</div></td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        function updateOrderStatus(index, newStatus) {
+            let orders = JSON.parse(localStorage.getItem('minimoo_orders')) || [];
+            if (orders[index]) {
+                orders[index].status = newStatus;
+                localStorage.setItem('minimoo_orders', JSON.stringify(orders));
+                // Reload dashboard to update colors
+                loadDashboard();
+            }
+        }
+
+        function clearAllData() {
+            if (confirm("WARNING: This will delete ALL orders and reviews locally. Are you sure?")) {
+                localStorage.removeItem('minimoo_orders');
+                localStorage.removeItem('minimoo_reviews');
+                loadDashboard();
+            }
+        }
+
+        // Initialize display
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

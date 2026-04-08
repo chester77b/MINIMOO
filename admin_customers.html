@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimoo Admin | Customer Database (CRM)</title>
+    <!-- Admin Authentication Lock -->
+    <script>
+        if (sessionStorage.getItem('minimoo_admin_auth') !== 'true') {
+            window.location.replace('admin_login.html');
+        }
+        function logout() {
+            sessionStorage.removeItem('minimoo_admin_auth');
+            window.location.replace('admin_login.html');
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ec4899;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --gray: #9ca3af;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--light); color: var(--dark); padding: 2rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 1rem; }
+        .dashboard-container { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+        .card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h1, h2 { color: var(--dark); }
+        .table-wrapper { overflow-x: auto; margin-top: 1rem; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; }
+        th { background-color: #f9fafb; font-weight: 600; color: #4b5563; }
+        .btn { background: var(--primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 500; text-decoration: none;}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 40px; height: 40px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">M</div>
+            <h1>Customer Database (CRM)</h1>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <a href="internal_dashboard.html" class="btn" style="background: white; color: var(--dark); border: 1px solid #ccc;">Back to Order Processing</a>
+            <button class="btn" style="background: #4b5563;" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>All Customer Information</h2>
+            </div>
+            <p style="color: var(--gray); font-size: 0.95rem; margin-bottom: 1.5rem;">This page is purely for admin eyes only. It aggregates unique customers from all their past orders.</p>
+            
+            <div class="table-wrapper">
+                <table id="customersTable">
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Email Address</th>
+                            <th>Phone Number</th>
+                            <th>Saved Address</th>
+                            <th>Total Orders</th>
+                            <th>Total Units Bought</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loadCustomers() {
+            const orders = JSON.parse(localStorage.getItem('minimoo_orders')) || [];
+            const customersBody = document.getElementById('customersBody');
+            customersBody.innerHTML = '';
+
+            // Group orders by Email (as the unique identifier) or fallback to Name
+            let customerMap = {};
+
+            orders.forEach(order => {
+                // Determine a unique key for the customer (use email if exists, otherwise lowercase name)
+                const uniqueKey = (order.email ? order.email.toLowerCase().trim() : null) || order.name.toLowerCase().trim();
+                
+                if (!customerMap[uniqueKey]) {
+                    customerMap[uniqueKey] = {
+                        name: order.name,
+                        email: order.email || 'N/A',
+                        phone: order.phone,
+                        address: order.address,
+                        totalOrders: 0,
+                        totalUnits: 0
+                    };
+                }
+
+                // Append order stats to this customer profile
+                customerMap[uniqueKey].totalOrders += 1;
+                customerMap[uniqueKey].totalUnits += parseInt(order.quantity) || 1;
+                
+                // Always keep the most recent address and phone if it changes
+                if (order.address) customerMap[uniqueKey].address = order.address;
+                if (order.phone) customerMap[uniqueKey].phone = order.phone;
+            });
+
+            const customerList = Object.values(customerMap);
+
+            if (customerList.length === 0) {
+                customersBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--gray); padding: 2rem;">No customer profiles found yet. Wait for a customer to place an order.</td></tr>';
+            } else {
+                customerList.forEach((customer) => {
+                    customersBody.innerHTML += `
+                        <tr>
+                            <td><strong>${customer.name}</strong></td>
+                            <td><a href="mailto:${customer.email}" style="color: var(--primary); text-decoration: none;">${customer.email}</a></td>
+                            <td><a href="https://wa.me/${customer.phone}" target="_blank" style="color: #10b981; text-decoration: none; font-weight: 500;">Wa.me: ${customer.phone}</a></td>
+                            <td><div style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${customer.address}">${customer.address}</div></td>
+                            <td><span style="background: #f3f4f6; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold;">${customer.totalOrders}</span></td>
+                            <td>${customer.totalUnits} Units</td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        // Initialize display
+        document.addEventListener('DOMContentLoaded', loadCustomers);
+    </script>
+</body>
+</html>

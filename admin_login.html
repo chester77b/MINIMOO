@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimoo Admin Login</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: #fce7f3; /* light pink background to match brand */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        .login-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.15);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-card img {
+            height: 60px;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+        .login-card h2 {
+            margin-bottom: 2rem;
+            color: #1f2937;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #ec4899;
+        }
+        .error-message {
+            color: #ef4444;
+            margin-bottom: 1rem;
+            display: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <img src="images/logominimoo.jpeg" alt="Minimoo Logo">
+        <h2>Admin Authentication</h2>
+        <div id="errorMsg" class="error-message">Invalid Username or Password!</div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required placeholder="example@gmail.com">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter password">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Secure Login</button>
+        </form>
+        <p style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af;">Secured Area. Restricted Access Only.</p>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value;
+            const error = document.getElementById('errorMsg');
+
+            if (user === 'kabadibyminimoo@gmail.com' && pass === 'akusukaecosurv') {
+                // Set session token
+                sessionStorage.setItem('minimoo_admin_auth', 'true');
+                // Redirect to dashboard
+                window.location.href = 'internal_dashboard.html';
+            } else {
+                error.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
